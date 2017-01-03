@@ -1,0 +1,41 @@
+
+* {
+font-family: 'Raleway', sans-serif;
+}
+
+body {
+	height:100vh;
+	background-image: url('../img/TINTIT-BANNER.jpg');
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.navbar-default {
+	border: none;
+	background: rgba(0, 0, 0, 0.8);
+	border-radius: 0;
+	height: 100px;
+}
+
+.navbar-brand {
+	height:100px;
+}
+
+.navbar-brand img {
+	max-height:100%;
+}
+
+.heading-row {
+	padding-top:120px;
+}
+
+.form-row {
+}
+
+#gearLoader {
+	display: none;
+}
+
+#emailForm {
+	display: none;
+}
