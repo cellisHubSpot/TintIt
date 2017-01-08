@@ -39,3 +39,8 @@ body {
 #emailForm {
 	display: none;
 }
+
+#result-row {
+	display: none;
+}
+
