@@ -24,6 +24,23 @@ app.get('/', function (req, res) {
   res.sendFile(path.join(__dirname + '/index.html'));
 })
 
+// dummy reg array
+var dummyReg= "161D12345";
+
+var dummyResponse = {
+    "response": {
+        "vehicle": {
+            "body": "SUV",
+            "chassis_no": "WP1ZZZ95ZHLB30313",
+            "colour": "Grey",
+            "doors": "4",
+            "make": "Porsche",
+            "model": "Macan",
+            "year_of_manufacture": "2016"
+        }
+    }
+}
+
 
 // Handle post request /reglookup
 app.post("/reglookup", function(req, res){
@@ -33,6 +50,24 @@ app.post("/reglookup", function(req, res){
 	// Get Reg from request
 	var reg = req.body.reg
 
+	// if reg === dummyReg - for testing purposes
+	if( reg == dummyReg ){
+
+		// We're just testing
+
+		console.log("request is test");
+
+		// respond with Dummy info
+		res.set('Content-Type', 'application/json');
+    res.send(dummyResponse);
+
+    // send info to hubspot
+		sendToHubspot(req, dummyResponse);
+
+    return
+	}
+
+	
 	// send request to motorcheck api using that reg
 	var url = "http://beta.motorcheck.ie/vehicle/reg/"+reg+"/identity/vin?_username=hubspot&_api_key=ee2a3d5b341f12a53e953e3ad5550de7dc1f9560";
 
@@ -75,9 +110,16 @@ app.post("/reglookup", function(req, res){
 
 function sendToHubspot (req, MC_res) {
 
+	console.log('sending to hubspot:', req.body, MC_res);
+
+	// Build vehicle string for submitting to form API
+	var vehicle = MC_res.response.vehicle;
+	var vehicleString = vehicle.year_of_manufacture + " " + vehicle.make + " " + vehicle.model + " - " + vehicle.body; 
+
 	var postData = querystring.stringify({
 	    'email': req.body.email,
-	    'vehicle_details': MC_res,
+	    'phone': req.body.phone,
+	    'vehicle_details': vehicleString,
 	    'hs_context': JSON.stringify({
 	        "hutk": req.cookies.hubspotutk,
 	        "ipAddress": req.headers['x-forwarded-for'] || req.connection.remoteAddress,
@@ -89,7 +131,7 @@ function sendToHubspot (req, MC_res) {
 	// set the post options, changing out the HUB ID and FORM GUID variables.
 	var options = {
 		hostname: 'forms.hubspot.com',
-		path: 'uploads/form/v2/632486/70f10f66-1f7a-4e9b-9d01-98ba6b375ce4',
+		path: '/uploads/form/v2/632486/70f10f66-1f7a-4e9b-9d01-98ba6b375ce4',
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/x-www-form-urlencoded',

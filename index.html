@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>TINT IT Free Quote Registration</title>
+	<title>TintIt Free Quote Check</title>
 
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -27,9 +27,14 @@
 	  </div>
 	</nav>
 	<div class="container-fluid container-main">
-		<div class="row heading-row">
+		<div class="row heading-row" id="result-row">
 			<div class="col-md-4 col-md-offset-2 col-lg-3 text-center col-lg-offset-2">
-				<h1 id="result">Get your free quote</h1>
+				<h3 id="result"></h3>
+			</div>
+		</div>	
+		<div class="row heading-row" id="form-row">
+			<div class="col-md-4 col-md-offset-2 col-lg-3 text-center col-lg-offset-2">
+				<h1>Get your free quote</h1>
 				<h3>Enter your reg and your email and we'll be in touch</h3>
 			</div>
 		</div>	
@@ -47,7 +52,7 @@
 				    <div class="help-block with-errors"></div>
 				  </div>
 				  <div class="form-group has-feedback">
-				    <input type="text" class="form-control" id="phone" placeholder="Your Phone Number" required pattern=".{5,14}" data-error="any Irish landline or mobile phone number">
+				    <input type="text" class="form-control" id="phoneNum" placeholder="Your Phone Number" required pattern=".{5,14}" data-error="any Irish landline or mobile phone number">
 				    <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
 				    <div class="help-block with-errors"></div>
 				  </div>
@@ -74,8 +79,11 @@
 		// capture email
 		var email = $('#email').val();
 
+		// Capture phone number
+		var phoneNum = $('#phoneNum').val();
+
 		// Build JSON object for request body
-		var body = {"reg": reg, "email": email};
+		var body = {"reg": reg, "email": email, "phone": phoneNum}
 
 		// Send to Motorcheck api
 		$.post( "/reglookup", body, function( res ) {
@@ -83,27 +91,38 @@
 			// Handle response
 			console.log(res);
 
-			if(res.statusCode !== 200) {
-				// we have an error
-				alert('something went wrong, try again. Error code:'+ res.statusCode);
+			if(res.response){
+				// we found a vehicle
 
-				// Reset UI
-				resetPage();
+				var vehicle = res.response.vehicle;
+				var resultString = vehicle.year_of_manufacture + " " + vehicle.make + " " + vehicle.model + " - " + vehicle.body; 
 
-				return
+				resultString = "Thank you! We'll be in touch shortly with a price for getting your " + resultString + " tinted out!"
+
+				// Print result to page
+			  $( "#result" ).html(resultString);
+
+			  // hide form etc
+			  $(' #form-row').hide();
+
+			  // show result row
+			  $('#result-row').show();
+
+			  // hide loader
+				$("#gearLoader").hide();
+
+			} else if (res.statusCode !== 200){
+					// Dharmesh we have an error
+					alert('Something went wrong, please try again. Error code:'+ res.statusCode);
+
+					// Reset UI
+					resetPage();
+
+					return
 			}
 
-			var vehicle = res.response.vehicle;
-			var resultString = vehicle.year_of_manufacture + " " + vehicle.make + " " + vehicle.model + " - " + vehicle.body; 
-
-
-		  $( "#result" ).html(resultString);
-
-		  // hide loader
-			$("#gearLoader").hide();
-
 			// show email form
-			$('#emailForm').show();
+			// $('#emailForm').show();
 
 		})
 
